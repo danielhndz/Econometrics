@@ -1,0 +1,174 @@
+---
+author: "Daniel Felipe Hernández"
+date: "18/10/2020"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Introducción a la Econometría (4ta. Ed.) - Wooldridge
+
+<br/>
+
+# 6. Análisis de regresión múltiple: temas adicionales
+
+```{r import-librarys, results='hide', message=FALSE}
+library(QuantPsyc)
+library(wooldridge)
+library(equatiomatic)
+```
+
+### 6.1 Efectos del escalamiento de datos sobre los estadísticos de MCO
+
+```{r read-data}
+data("bwght")
+```
+
+Cuando se reescalan las variables, tanto los coeficientes como los errores estándar, los intervalos de confianza, los estadísticos *t* y los estadísticos *F* se modifican de una manera tal que se preservan todos los efectos medidos y los resultados de las pruebas.
+
+La primer versión del modelo considera el pesos en onzas.
+
+```{r, results='asis'}
+model <- lm(formula = bwght ~ cigs + faminc, data = bwght) # Peso en onzas
+equatiomatic::extract_eq(model) # Modelo teórico
+equatiomatic::extract_eq(model, use_coefs = TRUE) # Modelo empírico
+```
+
+El estimado de `cigs` indica que si una mujer fuma cinco cigarros más por día, se pronostica que el peso del niño al nacer será aproximadamente `.4634(5) = 2.317` onzas menos.
+
+```{r}
+summary(model)
+```
+
+La segunda versión del modelo considera el peso en libras.
+
+```{r, results='asis'}
+model <- lm(formula = bwghtlbs ~ cigs + faminc, data = bwght) # Peso en libras
+equatiomatic::extract_eq(model) # Modelo teórico
+equatiomatic::extract_eq(model, use_coefs = TRUE) # Modelo empírico
+```
+
+```{r}
+summary(model)
+```
+
+La tercera versión del modelo considera paquetes de cigarros en lugar de cigarros individuales.
+
+```{r, results='asis'}
+model <- lm(formula = bwght ~ packs + faminc, data = bwght) # Paquetes de cigarros
+equatiomatic::extract_eq(model) # Modelo teórico
+equatiomatic::extract_eq(model, use_coefs = TRUE) # Modelo empírico
+```
+
+```{r}
+summary(model)
+```
+
+Si se hubiera especificado `log(bwght)`, como la variable dependiente, se hubiera estimado la ecuación y después vuela a estimar con `log(bwghtlbs)` como variable dependiente, en ambas regresiones los coeficientes de `cigs` y de `faminc` hubieran sido los mismos, sólo el intercepto hubiera sido diferente.
+
+### Ejemplo 6.1 - Efectos de la contaminación sobre el precio de la vivienda
+
+Este ejemplo ilustra el caso de los **coeficientes estandarizados** o **coeficientes beta**.
+
+```{r}
+data("hprice2")
+```
+
+```{r, results='asis'}
+model <- lm(formula = price ~ nox + crime + rooms + dist + stratio, data = hprice2)
+equatiomatic::extract_eq(model) # Modelo teórico
+```
+
+```{r}
+lm.beta(model) # Coeficientes beta sin errores estándar
+standard_hprice2 <- as.data.frame(Make.Z(hprice2)) # Estandarizar datos
+model <- lm(formula = price ~ nox + crime + rooms + dist + stratio, data = standard_hprice2) # Generar z-valores
+summary(model)
+```
+
+Una vez los datos están estandarizados, los coeficientes beta proporcionan muy información útil.
+
+```{r, results='asis'}
+equatiomatic::extract_eq(model, use_coefs = TRUE) # Modelo empírico estandarizado
+```
+
+Esta ecuación indica que un aumento de `nox` en una desviación estándar hace que el precio disminuya `.34` desviaciones estándar; un aumento de `crime` en una desviación estándar hace que el precio disminuya `.14` desviaciones estándar. De manera que una variación relativa de la contaminación poblacional tiene un efecto mayor sobre el precio de la vivienda que la misma variación relativa de la delincuencia.
+
+### 6.2 Más acerca de la forma funcional
+
+<br/>
+
+* #### Modelos con funciones logarítmicas
+
+Recuerde que en todo el libro `log(x)` es el logaritmo *natural* de *x*.
+
+```{r}
+model <- lm(formula = lprice ~ lnox + rooms, data = hprice2)
+summary(model)
+```
+
+```{r, results='asis'}
+equatiomatic::extract_eq(model, use_coefs = TRUE) # Ecuación 6.7
+```
+
+Por tanto, cuando `nox` aumenta `1%`, `price` disminuye `.718%`, manteniendo `rooms` constante. Cuando `rooms` aumenta en uno, `price` aumenta aproximadamente `100(.306) = 30.6%`.
+
+* #### Modelos con funciones cuadráticas
+
+Si usa valores simples y cuadrados de una variable exógena en su regresión, debe interpretarlos conjuntamente. En este ejemplo, estimo el modelo, guardo el resumen y calculo el valor de la variable exógena en la que el efecto conjunto es más alto extrayendo los coeficientes en la solución de la primera derivación de la fórmula del modelo.
+
+```{r}
+data("wage1")
+model <- lm(formula = wage ~ exper + expersq, data = wage1)
+summary(model) # Ecuación 6.12
+```
+
+La ecuación estimada indica que `exper` tiene un efecto decreciente sobre `wage`. El primer año de experiencia vale `30`¢ por hora ($.298). El segundo año de experiencia vale menos [aproximadamente `.298 - 2(.0061)(1) = .286`, es decir `28.6`¢, de acuerdo con la aproximación en (6.11) con `x = 1`]. Al pasar de 10 a 11 años de experiencia, el aumento predicho en `wage` es aproximadamente `.298 - 2(.0061)(10) = .176`, es decir `17.6`¢. Y así sucesivamente.
+
+A continuación se muestra la gráfica de la Ecuación 6.12.
+
+```{r, echo=FALSE}
+curve(
+  model$coefficients[1] + model$coefficients[2] * x + model$coefficients[3] * x^2, 
+  xlim = c(20, 30), 
+  xlab = "exper", 
+  ylab = "wage", ) # Figura 6.1
+```
+
+```{r}
+summary(model)
+sum.model <- summary(model)
+abs( sum.model$coefficient[2, 1] / (2 * sum.model$coefficient[3, 1]) ) # Ecuación 6.13
+```
+
+### Ejemplo 6.2 - Efectos de la contaminación sobre el precio de la vivienda
+
+Este ejemplo ilustra el caso en el que el modelo incluye un término cuadrático.
+
+```{r}
+model <- lm(lprice ~ lnox + log(dist) + rooms + I(rooms^2) + stratio, data = hprice2)
+summary(model) # Ecuación 6.14
+```
+
+```{r, echo=FALSE}
+curve(
+  model$coefficients[1] + model$coefficients[4] * x + model$coefficients[5] * x^2, 
+  xlim = c(3, 9), 
+  xlab = "rooms", ylab = "log(price)") # Figura 6.2
+```
+
+### Ejemplo 6.3 - Efectos de la asistencia a clases sobre el desempeño en el examen final
+
+Este ejemplo ilustra el caso en el que el modelo incluye un término de interacción.
+
+```{r}
+data("attend")
+model <- lm(stndfnl ~ atndrte + priGPA + ACT + I(priGPA^2) + I(ACT^2) + I(priGPA*atndrte), data = attend)
+summary(model) # Ecuación 6.19
+```
+
+Para la interpretación de los coeficientes ir a la página 198 del libro.
+

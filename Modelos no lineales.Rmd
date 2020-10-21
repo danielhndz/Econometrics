@@ -1,0 +1,45 @@
+---
+title: "Taller"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+## Escuela Colombiana de Ingeniería Julio Garavito
+## Programa de Economía
+## Econometría 1 (ECM1) - Grupo 1
+
+<br/>
+
+### Daniel Clavijo
+### Daniel Hernández
+
+<br/>
+
+## Taller - Modelos no Lineales
+
+1. Desarrolle los ejercicios empíricos que se encuentran al final del capítulo 8 (ejercicios E8.1 – E8.4) del texto de Stock & Watson “Introduction to Econometrics”. Las bases de datos se encuentran en el siguiente [link](https://wps.pearsoned.com/aw_stock_ie_3/178/45691/11696965.cw/index.html). Puede trabajar en STATA o en R.
+
+  * E8.1
+  
+  * E8.4
+  
+2. Desarrolle los ejercicios empíricos que se encuentran al final del capítulo 6 (ejercicios C6.1 – C6.13) del texto de Wooldridge “Introducción a la Econometria: Un enfoque moderno”. Las bases de datos se encuentran en el siguiente [link](http://fmwww.bc.edu/ec-p/data/wooldridge/datasets.list.html). Puede trabajar en STATA o en R.
+
+  * C6.1
+  
+  * C.13
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
